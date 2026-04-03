@@ -1,15 +1,3 @@
-"""
-app/llm/gemini_client.py
-------------------------
-Direct Google Gemini API client for vision tasks.
-
-Uses https://generativelanguage.googleapis.com REST API with the shared
-httpx.AsyncClient — no google-generativeai SDK needed.
-
-All page images are sent in ONE single Gemini call (multi-part inline_data).
-On ANY failure: logs the full reason, then raises GeminiError (subclass of
-LLMError) so the request is stopped immediately at the calling node.
-"""
 import asyncio
 import logging
 from typing import Any

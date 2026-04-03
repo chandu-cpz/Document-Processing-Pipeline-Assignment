@@ -1,14 +1,3 @@
-"""
-main.py
--------
-FastAPI application entry point.
-
-Run with:  fastapi dev main.py
-       or: uvicorn main:app --reload
-
-Logging uses uvicorn's built-in logger — no custom dictConfig.
-All modules log via logging.getLogger("uvicorn.error").
-"""
 import logging
 from contextlib import asynccontextmanager
 

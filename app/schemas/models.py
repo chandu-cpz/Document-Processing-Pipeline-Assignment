@@ -1,11 +1,3 @@
-"""
-app/schemas/models.py
----------------------
-Minimal API envelope only.
-We make ZERO assumptions about what fields the LLMs will extract —
-that's entirely up to the models based on what they see in the document.
-extracted_data is a free-form dict: whatever the LLM returns, we pass through.
-"""
 from typing import Any
 from pydantic import BaseModel, Field
 

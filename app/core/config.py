@@ -1,8 +1,3 @@
-"""
-app/core/config.py
-------------------
-Type-safe settings loaded from .env via pydantic-settings.
-"""
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 

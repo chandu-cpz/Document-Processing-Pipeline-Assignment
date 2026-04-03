@@ -1,19 +1,3 @@
-"""
-app/graph/workflow.py
----------------------
-LangGraph StateGraph builder.
-
-Call count (total LLM calls for an N-page PDF):
-  1 call  — segregator (all N pages classified in one Gemini vision call)
-  1 call  — id_agent vision          (Gemini, all identity pages at once)
-  1 call  — id_agent text extraction (Qwen)
-  1 call  — discharge_agent vision   (Gemini, all discharge pages at once)
-  1 call  — discharge_agent text extraction (Qwen)
-  1 call  — bill_agent vision        (Gemini, all bill pages at once)
-  1 call  — bill_agent text extraction (Qwen)
-  ─────────────────────────────────────────────────────────────────────────
-  Max 7 LLM calls total, regardless of page count.
-"""
 import functools
 import logging
 from typing import Any

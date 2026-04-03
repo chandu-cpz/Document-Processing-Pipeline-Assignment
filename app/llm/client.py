@@ -1,15 +1,3 @@
-"""
-app/llm/client.py
------------------
-OpenRouter text-only client + LLMPipeline facade.
-
-LLMPipeline is the single object injected into all graph nodes:
-  - vision_pages_to_markdown  → GeminiClient  (Google AI direct API)
-  - markdown_to_json          → OpenRouterClient (OpenAI-compat API)
-
-Keeping the two clients separate allows independent retries, timeouts,
-and model configuration while presenting a unified interface to nodes.
-"""
 import asyncio
 import json
 import logging

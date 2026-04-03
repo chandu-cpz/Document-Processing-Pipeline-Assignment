@@ -1,25 +1,3 @@
-"""
-app/graph/nodes/page_agents.py
--------------------------------
-Three extraction agent nodes:
-  - id_agent        → all identity_document pages
-  - discharge_agent → all discharge_summary pages
-  - bill_agent      → all itemized_bill pages
-
-Each agent receives ALL pages of its type in one AgentInput via Send().
-
-Two-step pipeline (one Gemini call + one Qwen call each):
-  1. Gemini vision call: ALL assigned pages in ONE call → rich Markdown
-     The model transcribes all pages sequentially in a single response.
-  2. Qwen text call: that Markdown → free-form JSON extraction
-     No prescribed schema — the LLM decides what to extract.
-
-Fail-fast policy on vision errors:
-  If the Gemini vision call fails for any reason, the full error is logged
-  and immediately re-raised — stopping that agent branch and propagating up
-  to the routes layer as HTTP 500. Text extraction errors are logged and
-  produce an empty extracted dict (non-fatal, agent continues).
-"""
 import logging
 from typing import Any
 

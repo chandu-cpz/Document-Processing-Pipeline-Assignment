@@ -1,15 +1,3 @@
-"""
-app/core/pdf_utils.py
----------------------
-Async PDF → base64-encoded JPEG page converter.
-
-Uses PyMuPDF (fitz) at the configured DPI (default 150).
-Outputs JPEG at 85% quality — same resolution as PNG but ~6-8x smaller
-payload, keeping 18-page batches well within OpenRouter's request limits.
-
-CPU-bound render is offloaded to a thread pool via asyncio.to_thread
-so it never blocks the async event loop.
-"""
 import asyncio
 import base64
 import logging

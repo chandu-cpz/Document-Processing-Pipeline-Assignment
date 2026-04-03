@@ -1,19 +1,3 @@
-"""
-app/graph/nodes/segregator.py
-------------------------------
-Segregator Agent node.
-
-ONE single Gemini vision call with ALL page images.
-The model sees every page simultaneously and classifies them all at once.
-This avoids per-page API calls (eliminating 429 rate limiting) and lets
-the model use context from adjacent pages when classifying ambiguous ones.
-
-Fail-fast policy: if the vision call fails for any reason, the error is
-logged in full and immediately re-raised — stopping the entire request with
-a clear 500 response. There is no silent fallback to "other" on LLM errors.
-
-Returns page_assignments.
-"""
 import json
 import logging
 from typing import Any

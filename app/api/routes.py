@@ -1,22 +1,3 @@
-"""
-app/api/routes.py
------------------
-POST /api/process — the single API endpoint.
-
-Accepts:
-  - claim_id (str, form field)
-  - file     (PDF, multipart upload)
-
-Flow:
-  1. Validate file type
-  2. Read raw bytes from UploadFile (async)
-  3. Convert PDF → base64 PNG pages (async, thread-offloaded)
-  4. Build initial PipelineState
-  5. Run graph.ainvoke(state) — fully async LangGraph execution
-  6. Return final_output as JSON
-
-All errors are surfaced as appropriate HTTP exceptions with clear messages.
-"""
 import logging
 
 from fastapi import APIRouter, File, Form, HTTPException, Request, UploadFile
@@ -104,7 +85,6 @@ async def process_document(
         "claim_id": claim_id,
         "pages": pages,
         "page_assignments": {},
-        "_sends": [],
         "agent_results": [],
         "final_output": {},
         "errors": [],

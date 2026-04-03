@@ -1,18 +1,3 @@
-"""
-tests/test_api.py
------------------
-Real end-to-end integration tests.
-
-- Uses the actual final_image_protected.pdf (18-page image-only scanned PDF).
-- Makes real LLM calls to OpenRouter (vision + text models).
-- No mocking — tests the full pipeline from PDF upload to extracted JSON.
-
-Run:
-    .venv/bin/pytest tests/test_api.py -v -s
-
-Note: These tests make real API calls and will take 1-3 minutes to complete
-depending on OpenRouter response times.
-"""
 import json
 import os
 import pathlib

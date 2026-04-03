@@ -1,14 +1,3 @@
-"""
-app/graph/state.py
-------------------
-LangGraph shared state definitions.
-
-Architecture (single-call-per-agent):
-  - Segregator → ONE vision call with ALL page images → classifies all pages
-  - Each agent → ONE vision call with ALL its assigned pages → transcribes all
-                  ONE text call → extracts JSON from the combined markdown
-  - Send() emits ONE message per agent TYPE (not per page)
-"""
 from typing import Annotated, Any
 from typing_extensions import TypedDict
 import operator

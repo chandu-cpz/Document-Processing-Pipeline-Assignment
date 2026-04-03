@@ -1,12 +1,3 @@
-"""
-app/graph/nodes/aggregator.py
-------------------------------
-Aggregator node — merges all AgentResults into final_output.
-
-Since each agent now processes all its pages in a single call and returns
-one AgentResult, this is a simple key-based merge (no multi-page reducer
-needed at this level).
-"""
 import logging
 from typing import Any
 
