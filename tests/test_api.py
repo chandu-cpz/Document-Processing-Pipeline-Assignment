@@ -48,7 +48,8 @@ def client():
     Session-scoped TestClient so the FastAPI lifespan (httpx.AsyncClient +
     LangGraph graph compilation) runs only once across all tests.
     """
-    with TestClient(app, raise_server_exceptions=True) as c:
+    # Setup TestClient with timeout to accommodate slow OpenRouter API responses
+    with TestClient(app, raise_server_exceptions=True, timeout=300.0) as c:
         print("\n[fixture] FastAPI TestClient started (real OpenRouter client ready)")
         yield c
         print("\n[fixture] FastAPI TestClient shutting down")
@@ -138,7 +139,6 @@ def test_full_pipeline_real_pdf(client: TestClient, pdf_bytes: bytes):
         "/api/process",
         data={"claim_id": claim_id},
         files={"file": (PDF_PATH.name, pdf_bytes, "application/pdf")},
-        timeout=300.0,  # real LLM calls: allow up to 5 minutes
     )
     elapsed = time.monotonic() - start
 

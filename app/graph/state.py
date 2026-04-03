@@ -81,7 +81,6 @@ class PipelineState(TypedDict):
 
     # ── Filled by segregator ────────────────────────────────────────────────
     page_assignments: dict[str, list[int]]   # doc_type → [page_idx, ...]
-    _sends: Annotated[list[Any], lambda _, new: new]  # replace, never accumulate
 
     # ── Filled by agent nodes (fan-in via reducer) ──────────────────────────
     agent_results: Annotated[list[AgentResult], _accumulate]

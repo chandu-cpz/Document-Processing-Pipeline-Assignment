@@ -21,7 +21,7 @@ from typing import Any
 from langgraph.graph import StateGraph, START, END
 from langgraph.types import Send
 
-from app.graph.state import PipelineState
+from app.graph.state import PipelineState, AGENT_NODE_MAP
 from app.graph.nodes.segregator import segregator_node
 from app.graph.nodes.page_agents import id_agent, discharge_agent, bill_agent
 from app.graph.nodes.aggregator import aggregator_node
@@ -32,7 +32,7 @@ logger = logging.getLogger("uvicorn.error")
 
 def _fan_out(state: PipelineState) -> list[Send] | str:
     """
-    Conditional edge: emit the Send objects built by the segregator.
+    Conditional edge: emit the Send objects based on segregator's page_assignments.
     Each Send delivers all pages of one type to its agent node.
 
     Fallback: if no pages were routed to any extraction agent (e.g. the
@@ -41,14 +41,43 @@ def _fan_out(state: PipelineState) -> list[Send] | str:
     and produces a valid (empty-extraction) response instead of silently
     terminating mid-graph.
     """
-    sends = state.get("_sends", [])
+    page_assignments = state.get("page_assignments", {})
+    pages = state.get("pages", [])
+    sends: list[Send] = []
+
+    for doc_type, node_name in AGENT_NODE_MAP.items():
+        assigned_indices = page_assignments.get(doc_type, [])
+        if not assigned_indices:
+            continue
+            
+        # Filter the original pages list without building a full lookup dictionary
+        assigned_set = set(assigned_indices)
+        agent_pages = [p for p in pages if p["page_idx"] in assigned_set]
+        
+        if not agent_pages:
+            continue
+            
+        sends.append(
+            Send(
+                node_name,
+                {
+                    "pages": agent_pages,
+                    "doc_type": doc_type,
+                },
+            )
+        )
+        logger.info(
+            f"Fan-out: routing {len(agent_pages)} page(s) → '{node_name}': "
+            f"pages {assigned_indices}"
+        )
+
     if not sends:
         logger.warning(
             "Fan-out: no pages routed to any extraction agent — "
             "skipping directly to aggregator"
         )
         return "aggregator"
-    logger.info(f"Fan-out: {len(sends)} agent branch(es) activated")
+
     return sends
 
 

@@ -33,6 +33,22 @@ graph TD
    - Qwen Text: Extracts free-form structured JSON from the Markdown.
 4. **Aggregator**: Consolidates results.
 
+## Key Design Decisions
+
+- **Single Vision Call for Segregation**: Instead of making $N$ API calls for an $N$-page document (which triggers 429 rate limits), all $N$ images are sent to the Vision model in a single prompt.
+- **Free-form Text Extraction**: Instead of enforcing strict Pydantic schemas which often fail on highly variable medical documents, we ask the text LLM to return descriptive JSON mapping exactly what's printed on the page.
+- **State Cleanliness**: The LangGraph state only holds core business data. Routing meta-data is dynamically computed inside conditional edges rather than polluting the shared pipeline state.
+
+## Graph Internals
+
+The graph relies on a shared `PipelineState` dictionary:
+- `pages`: Base64 encoded JPEG pages.
+- `page_assignments`: Populated by the **Segregator**, maps doc_type to page indices (e.g., `{"itemized_bill": [8, 9]}`).
+- `agent_results`: Accumulated outputs from parallel agent runs.
+
+**Dynamic Routing (`_fan_out`)**
+The `Segregator` feeds into a conditional edge `_fan_out`. Instead of following hardcoded paths, `_fan_out` dynamically inspects the `page_assignments` and returns a list of `Send("agent_node", AgentInput)` objects. LangGraph natively spawns a parallel execution branch for every `Send` object emitted.
+
 ## Requirements
 
 - Python 3.10+
@@ -91,3 +107,14 @@ pytest tests/ -k "not real_pdf" -v
 # Run the full end-to-end pipeline test
 pytest tests/test_api.py::test_full_pipeline_real_pdf -v -s
 ```
+
+## Error Handling Table
+
+| Failure Point | Behavior | Result |
+| --- | --- | --- |
+| Invalid File / Empty File | FastAPI validation fails | **HTTP 400 Bad Request** |
+| Segregator Vision Model Fails | Logged & immediately raised (Fail-Fast) | **HTTP 500 Server Error** |
+| Segregator returns invalid JSON | Caught, all pages defaulted to `"other"` | Pipeline continues smoothly |
+| Agent Vision Model Fails | Logged & raised for that branch (Fail-Fast) | **HTTP 500 Server Error** |
+| Agent Text Model Fails | Logged heavily (Non-Fatal), returns empty `{}` | Pipeline continues smoothly |
+

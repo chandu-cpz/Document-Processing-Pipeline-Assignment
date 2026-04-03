@@ -12,14 +12,11 @@ Fail-fast policy: if the vision call fails for any reason, the error is
 logged in full and immediately re-raised — stopping the entire request with
 a clear 500 response. There is no silent fallback to "other" on LLM errors.
 
-Returns page_assignments and a list of Send() objects — one per agent type
-that has at least one page assigned to it.
+Returns page_assignments.
 """
 import json
 import logging
 from typing import Any
-
-from langgraph.types import Send
 
 from app.graph.state import (
     DOC_TYPES,
@@ -152,34 +149,11 @@ async def segregator_node(
     for v in page_assignments.values():
         v.sort()
 
-    # ── Build ONE Send per agent type (all pages of that type bundled) ────────
-    sends: list[Send] = []
-    for doc_type, node_name in AGENT_NODE_MAP.items():
-        assigned_indices = page_assignments.get(doc_type, [])
-        if not assigned_indices:
-            continue
-        agent_pages = [page_lookup[idx] for idx in assigned_indices]
-        sends.append(
-            Send(
-                node_name,
-                {
-                    "pages": agent_pages,
-                    "doc_type": doc_type,
-                },
-            )
-        )
-        logger.info(
-            f"Routing {len(agent_pages)} page(s) → '{node_name}': "
-            f"pages {assigned_indices}"
-        )
-
     logger.info(
-        f"Segregator done: {len(pages)} pages classified, "
-        f"{len(sends)} agent(s) activated"
+        f"Segregator done: {len(pages)} pages classified"
     )
 
     return {
         "page_assignments": page_assignments,
-        "_sends": sends,
         "errors": errors,
     }
